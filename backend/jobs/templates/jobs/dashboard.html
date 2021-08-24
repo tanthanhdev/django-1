@@ -1,0 +1,226 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load filename %}
+
+{% block title %}Home{% endblock %}
+{% block headCss %}
+<link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.min.css' %}">
+<link rel="stylesheet" href="{% static 'jobs/css/jobs.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="table-wrapper">
+    <div class="table-title">
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="form-group d-flex my-0">
+            <label class="mb-0 mr-3 align-self-center" for="filterStatus">Status</label>
+            <form action="GET" class="w-25">
+              <select class="form-control" id="filterStatus">
+                <option value='all'>All</option>
+                <option value='running'>Running</option>
+                <option value='stop'>Stop</option>
+              </select>
+            </form>
+         </div>
+        </div>
+        <div class="col-sm-8 text-right">
+          <label class="mr-2" for="switch_autoRefresh">Auto Refresh</label>
+          <span id="switch_autoRefresh">
+            <input type="checkbox" data-toggle="toggle" data-on="Running" data-off="Stop" data-onstyle="primary" data-offstyle="danger">
+          </span>
+          <label class="mr-2" for="switch_refreshStatus">Refresh Status</label>
+          <span id="switch_refreshStatus" >
+            <input type="checkbox" data-toggle="toggle" data-on="Running" data-off="Stop" data-onstyle="primary" data-offstyle="danger">
+          </span>
+          <a class="btn btn-success show-btn-add ml-2"><i class="far fa-plus-square me-2"></i><span>Add New Job</span></a>
+        </div>
+      </div>
+    </div>
+    <!-- List job -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <th width="10%">ID</th>
+          <th width="20%">JOB NAME</th>
+          <th width="20%">STATUS</th>
+          <th width="20%">THUMB</th>
+          <th width="10%">DOCUMENT</th>
+          <th width="20%">ACTION</th>
+        </thead>
+        <tbody>
+          {% if list_job %}
+            {% for job in list_job %}
+              <tr>
+                <td>{{job.id}}</td>
+                <td>{{job.name}}</td>
+                <td class="td-status-{{job.id}}" alt='{{job.id}}'>{% if job.status == True %} Running {% elif job.status == False %} Stop {% endif %}</td>
+                {% if job.thumb %}
+                <td width="20%"><img src="{{ job.thumb.url }}" alt="{{ job.thumb|filename }}" class="img-thumbnail"></td>
+                {% else %}
+                <td width="15%"><img src="" alt="" class="img-thumbnail"></td>
+                {% endif %}
+                {% if job.document %}
+                <td width="20%"><a href="{{ job.document.url }}" target="_blank" class="document document-focusable"> <i class="fas fa-file"></i> {{job.document|filename}} </a></td>
+                {% else %}
+                <td width="15%"><a href="#" class="document document-focusable">File doesn't exist</a></td>
+                {% endif %}
+                <td>
+                  <a class="btn btn-outline-warning edit" role="button" value="{{job.pk}}">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a class="btn btn-outline-danger table-link danger delete" role="button" value="{{job.pk}}">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- modal form -->
+  <div id="addJob" class="job fade">
+    <div class="job-dialog">
+      <div class="job-content">
+        <form id="form-add" method="POST" enctype="multipart/form-data" action="{% url 'add-new-job' %}">
+          {% csrf_token %}
+          <div class="job-header">
+            <h4 class="job-title">Add Job</h4>
+            <button class="close">X</button>
+          </div>
+          <!-- ===== Job body ===== -->
+          <div class="job-body">
+            <div class="form-group">
+              <label for="thumb">THUMB</label>
+              <div class="d-flex flex-column image-upload">
+                <input name="thumb" type="file" class="thumb form-control" id="thumb" placeholder="thumb">
+                <span class="text-danger" id="error-thumb"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="name">JOB NAME</label>
+              <div class="d-flex flex-column">
+                <input name="name" id="job-name" type="text" class="job-name form-control">
+                <span class="text-danger" id="error-name"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="id_start_time">START TIME</label>
+              <div class="d-flex flex-column">
+                <!-- {{form.start_time}} -->
+                <input type="text" name="start_time" class="form-control my-icon" id="start-time">
+                <!-- <input name="start_time" id="start-time" type="datetime-local" class="form-control"> -->
+                <span class="text-danger" id="error-start-time"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="id_end_time">END TIME</label>
+              <div class="d-flex flex-column">
+                <!-- {{form.end_time}} -->
+                <input type="text" name="end_time" class="form-control my-icon" id="end-time">
+                <!-- <input name="end_time" id="end-time" type="datetime-local" class="form-control"> -->
+                <span class="text-danger" id="error-end-time"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="document">DOCUMENT</label>
+              <div class="d-flex flex-column document-upload">
+                <input name="document" type="file" class="document form-control" id="document" placeholder="document">
+                <span class="text-danger" id="error-document"></span>
+              </div>
+            </div>
+          </div>
+          <!-- ===== END: Job body ===== -->
+          <div class="job-footer">
+            <input type="button" class="btn btn-default" value="cancel">
+            <button type="submit" class="btn btn-success" id="btn-add">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="updateJob" class="job fade">
+    <div class="job-dialog">
+      <div class="job-content">
+        <form id="form-update" method="POST">
+          {% csrf_token %}
+          <div class="job-header">
+            <h4 class="job-title">Update Job</h4>
+            <button class="close">X</button>
+          </div>
+          <!-- ===== Job body ===== -->
+          <div class="job-body">
+            <div class="form-group">
+              <label for="thumb">THUMB</label>
+              <div class="d-flex flex-column image-upload2">
+                <img src="" alt="thumbnail" class="img-thumbnail" id="img-thumb1">
+                <input name="thumb" type="file" class="thumb form-control" id="thumb1" placeholder="thumb">
+                <span class="text-danger" id="error-thumb"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <!-- validate exists-->
+              <label for="name">JOB NAME</label>
+              <div class="d-flex flex-column">
+                <input name="name" id="job-name1" type="text" class="job-name form-control">
+                <span class="text-danger" id="error-name1"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="status">STATUS</label>
+              <div class="d-flex flex-column">
+                <select name="status" class="form-control" id="status1">
+                  <option value="False" selected="">Stop</option>
+                  <option value="True">Running</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="start_time">START TIME</label>
+              <div class="d-flex flex-column">
+                <input type="text" name="start_time" class="form-control my-icon" id="start-time1">
+                <!-- <input name="start_time" id="start-time1" type="datetime-local" class="form-control"> -->
+                <span class="text-danger" id="error-start-time1"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <!-- bigger on start time -->
+              <label for="end_time">END TIME</label>
+              <div class="d-flex flex-column">
+                <input type="text" name="end_time" class="form-control my-icon" id="end-time1">
+                <!-- <input name="end_time" id="end-time1" type="datetime-local" class="form-control"> -->
+                <span class="text-danger" id="error-end-time1"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="document">DOCUMENT</label>
+              <div class="d-flex flex-column document-upload1">
+                <input name="document" type="file" class="document form-control" id="document1" placeholder="document">
+                <a href="" target="_blank" class="document document-focusable"> <i class="fas fa-file"></i> </a>
+                <span class="text-danger" id="error-document"></span>
+              </div>
+            </div>
+          </div>
+          <!-- ===== END: Job body ===== -->
+          <div class="job-footer">
+            <input type="button" class="btn btn-default" value="cancel">
+            <button type="submit" class="btn btn-success" id="btn-update">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block footerJs %}
+<script type="text/javascript" src="{% static 'js/moment.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'jobs/js/jobs.js' %}"></script>
+<script>
+  if (`{{parameter}}` != 'None') {
+      $("#filterStatus").val('{{parameter}}').trigger("change");
+  }
+</script> 
+{% endblock %}

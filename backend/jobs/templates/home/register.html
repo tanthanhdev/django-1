@@ -1,0 +1,141 @@
+{% extends "layouts/base_home.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register{% endblock %}
+{% block headerCss %}
+<link rel="stylesheet" href="{% static 'jQuery-Plugin-For-Password-Strength-Checker-and-Indicator-Password-Strength/password_strength/password_strength.css' %}">
+<link rel="stylesheet" href="{% static 'home/css/register.css' %}" type="text/css">
+<link rel="stylesheet" href="{% static 'css/select-box.css' %}" type="text/css">
+{% endblock %}
+
+<!-- content -->
+{% block content %}
+<main class="container">
+  <div class="card bg-light">
+    <article class="card-body mx-auto" style="max-width: 400px;">
+      <h4 class="card-title mt-3 text-center">Create Account</h4>
+      <p class="text-center">Get started with your free account</p>
+      <p>
+        <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-twitter"></i>   Login via Twitter</a>
+        <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via facebook</a>
+      </p>
+      <p class="divider-text">
+        <span class="bg-light">OR</span>
+      </p>
+      <form id="form_registration app-cover" method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div class="form-group input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+          </div>
+          {{form.first_name}}
+          {{form.last_name}}
+          <span class="error-text" id="bas-first_name">{{ form.first_name.errors.as_text }}</span>
+        </div> 
+        <!-- form-group// -->
+        <div class="form-group input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+          </div>
+            {{form.email}}
+            <span class="error-text" id="bas-email">{{ form.email.errors.as_text }}</span>
+        </div> 
+        <!-- form-group// -->
+        <div class="form-group input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+          </div>
+          {% if form.password %}
+            {{form.password}}
+            <div id="custom_new_password" class="strength_wrapper"></div>
+            <span class="error-text" id="bas-password">{{ form.password.errors.as_text }}</span>
+          {% endif %}
+        </div> <!-- form-group// -->
+        <!-- <div class="message nested mb-3">
+          <ul class="my-1">
+            <li>Your password can’t be too similar to your other personal information.</li>
+            <li>Your password must contain at least 8 characters.</li>
+            <li>Your password can’t be a commonly used password.</li>
+            <li>Your password can’t be entirely numeric.</li>
+          </ul>
+        </div> -->
+        <div class="form-group input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+          </div>
+          {% if form.password %}
+            {{form.confirm_password}}
+            <div id="custom_confirm_password" class="strength_wrapper"></div>
+            <span class="error-text" id="bas-confirm_password">{{ form.confirm_password.errors.as_text }}</span>
+          {% endif %}
+        </div> <!-- form-group// -->                  
+        <!-- Select group user -->
+        <select class="form-group form-control" name="group" id="group-user" >
+          <option value="customer">Customer</option>
+          <option value="employer">Employer</option>
+        </select>
+        <!-- Select group user end -->
+        <div class="form-group mb-3">
+            <button type="submit" class="btn btn-primary btn-block"> Create Account  </button>
+        </div> <!-- form-group// -->      
+        <p class="text-center">Have an account? <a href="{% url 'login' %}">Log In</a> </p>                                                                 
+      </form>
+    </article>
+  </div> <!-- card.// -->
+{% endblock content %}
+<!-- End: content -->
+{% block footerJs %}
+<script type="text/javascript">
+  $(() => {
+    $('#custom_new_password').strength_meter();
+    $('#custom_confirm_password').strength_meter();
+
+    $(".custom_new_password").keyup(() => {
+      $("#id_password").val($(".custom_new_password").val());
+    }); 
+    $(".custom_confirm_password").keyup(() => {
+      $("#id_confirm_password").val($(".custom_confirm_password").val());
+    }); 
+
+    $('#form_registration').submit((e) => {
+      e.preventDefault();
+      let data = new FormData($('#form_registration').get(0));
+      $.ajax({
+        type: $('#form_registration').attr('method'),
+        url: $('#form_registration').attr('action'),
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+      }).done((data) => {
+        if(data.status === 'failed') {
+          console.log(data)
+          $('#id_password').val('');
+          $('#id_confirm_password').val('');
+          $('.custom_new_password').val("");
+          $('.custom_confirm_password').val("");
+          $('.error-text').text("");
+          $('#bas-first_name').text(data['form-errors']['first_name']);
+          $('#bas-last_name').text(data['form-errors']['last_name']);
+          $('#bas-email').text(data['form-errors']['email']);
+          if (data['form-errors']['password']){
+              $('#bas-password').text(data['form-errors']['password'][0]);
+          }
+          if (data['form-errors']['confirm_password']){
+              $('#bas-confirm_password').text(data['form-errors']['confirm_password'][0]);
+          }
+        } else {
+          window.location.href = '/';
+        }
+      }).fail((data) => {
+  
+      });
+  });
+
+  })
+</script>
+
+<script src="{% static 'jQuery-Plugin-For-Password-Strength-Checker-and-Indicator-Password-Strength/password_strength/password_strength_lightweight.js' %}"></script>
+<script type="text/javascript" src="{% static 'home/js/register.js' %}"></script>
+{% endblock %}
