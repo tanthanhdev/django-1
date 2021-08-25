@@ -17,17 +17,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from jobs.views import *
+from accounts.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jobs.urls')),
+    path('accounts/', include('accounts.urls')),
     
     path('', login, name = 'login'),
-    path('accounts/login/', login, name = 'accounts-login'),
     path('logout/', logout, name = 'logout'),
     path('register/', register, name = 'register'),
-    path('reset-password/', register, name = 'reset-password'),
-    path('accounts/reset-password/', register, name = 'accounts-reset-password'),
+    
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

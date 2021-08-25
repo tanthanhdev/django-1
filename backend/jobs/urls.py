@@ -13,6 +13,4 @@ urlpatterns = [
 
     path('user/', user, name='user-page'),
 
-    # email confirmation
-    path('activate-user/<uidb64>/<token>', activate_user, name='activate')
 ]
