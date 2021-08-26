@@ -78,7 +78,47 @@
           {% endif %}
         </tbody>
       </table>
+      <!-- Pagination -->
+      <nav aria-label="Page pagination example">
+        {% if list_job.has_other_pages %}
+          <ul class="pagination mt-3 justify-content-center">
+            {% if list_job.has_previous %}
+              <li class="page-item">
+                <a href="?{% if parameter %}status={{ parameter }}&{% endif %}page={{ list_job.previous_page_number }}" class="page-link">&laquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <a href="#" class="page-link" tabindex="-1"><span>&laquo;</span></a>
+              </li>
+            {% endif %}
+
+            {% for i in list_job.paginator.page_range %}
+              {% if list_job.number == i %}
+                <li class="page-item active">
+                  <a href="?{% if parameter %}status={{ parameter }}&{% endif %}page={{ i }}" class="page-link">{{ i }}<span class="sr-only">(current)</span></a>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a href="?{% if parameter %}status={{ parameter }}&{% endif %}page={{ i }}" class="page-link">{{ i }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if list_job.has_next %}
+              <li class="page-item">
+                <a href="?{% if parameter %}status={{ parameter }}&{% endif %}page={{ list_job.next_page_number }}" class="page-link">&raquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <a href="#" class="page-link" tabindex="-1"><span>&raquo;</span></a>
+              </li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      </nav>
+      <!-- Pagination end -->
     </div>
+    <!-- List job end -->
   </div>
   <!-- modal form -->
   <div id="addJob" class="job fade">

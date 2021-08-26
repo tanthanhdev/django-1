@@ -163,3 +163,6 @@ django_heroku.settings(locals())
 MAX_UPLOAD_IMAGE_SIZE = 5242880
 # 1000MB
 MAX_UPLOAD_FILE_SIZE = 1048576000
+
+# Paginator 
+NUMBER_PAGINATION = 5
