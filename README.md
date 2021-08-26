@@ -16,10 +16,12 @@
 
 ## Features_common
 
- + List of job.
+ + Show list of job.
  + Add/delete/update record
- + Login/logout (authentication)
+ + Pagination
+ + Login/logout/register/forgot password (Built in email verification)
  + Authorized
+ + Authentication
  + Refresh status
 
 ## Credits
