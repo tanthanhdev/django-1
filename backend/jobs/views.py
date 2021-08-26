@@ -16,6 +16,8 @@ from .utils import *
 import json
 import base64
 from djangotest import refresh_statuses
+# paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -28,22 +30,35 @@ class HomeView(LoginRequiredMixin, View):
       Home view
     """
   
-  def get(self, request, *args, **kwargs):
-    print(request.user.is_authenticated)
-    jobForm = JobForm()
+  def get_list(self, request):
     jobs = Job.objects.all()
+    jobForm = JobForm()
     status = request.GET.get('status', None)
     if status == 'stop':
       jobs = jobs.filter(status=False)
     elif status == 'running':
       jobs = jobs.filter(status=True)
+    
+    page = request.GET.get('page', 1)
+    paginator = Paginator(jobs, settings.NUMBER_PAGINATION)  
+    try:
+      data = paginator.page(page)
+    except PageNotAnInteger:
+      data = paginator.page(1)
+    except EmptyPage:
+      data = paginator.page(paginator.num_pages)
+    except:
+      data = None
     context = {
-      'list_job': jobs,
+      'list_job': data,
       'parameter': status,
       'form': jobForm,
     }
+    return context
+  
+  def get(self, request, *args, **kwargs):
+    context = self.get_list(request)
     return render(request, 'jobs/dashboard.html', context=context)
-
 
 # @allowed_users(allowed_roles=['employer'])
 # def home(request):
